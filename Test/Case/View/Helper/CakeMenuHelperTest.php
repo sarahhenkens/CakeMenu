@@ -46,4 +46,96 @@ class CakeMenuHelperTest extends CakeTestCase {
 		);
 		$this->assertEquals($expected, $result);
 	}
+
+/**
+ * testAddSimple method
+ *
+ * @return void
+ */
+	public function testAddSimple() {
+		$this->CakeMenu->add('default', 'first', 'First Label');
+		$this->CakeMenu->add('default', 'second', 'Second Label');
+
+		$result = $this->CakeMenu->config('default');
+		
+		$expected = array('first', 'second');
+		$this->assertEquals($expected, array_keys($result['items']));
+
+		$expected = array(
+			'label' => 'Second Label',
+			'options' => array()
+		);
+		$this->assertEquals($expected, $result['items']['second']);
+	}
+
+/**
+ * testAddSubmenus method
+ *
+ * @return void
+ */
+	public function testAddSubmenus() {
+		$this->CakeMenu->add('default', 'root_one', 'Root First');
+		$this->CakeMenu->add('default', 'root_two', 'Root Second');
+
+		$this->CakeMenu->add('default.root_one', 'item_a', 'Item A');
+		$this->CakeMenu->add('default.root_one', 'item_b', 'Item B');
+
+		$result = $this->CakeMenu->config();
+		$expected = array('default');
+		$this->assertEquals($expected, array_keys($result));
+
+		$result = $this->CakeMenu->config('default');
+
+		$expected = array('root_one', 'root_two');
+		$this->assertEquals($expected, array_keys($result['items']));
+
+		$expected = array('label', 'options', 'items');
+		$this->assertEquals($expected, array_keys($result['items']['root_one']));
+		$expected = array('label', 'options');
+		$this->assertEquals($expected, array_keys($result['items']['root_two']));
+
+		$expected = array('item_a', 'item_b');
+		$this->assertEquals($expected, array_keys($result['items']['root_one']['items']));
+	}
+
+/**
+ * testRenderBasic method
+ *
+ * @return void
+ */
+	public function testRenderBasic() {
+		$this->CakeMenu->create('default', array(
+			'renderer' => 'CakeMenu.TestList'
+		));
+
+		$this->CakeMenu->add('default', 'foo', 'Foo Item');
+		$this->CakeMenu->add('default', 'bar', 'Bar Item');
+
+		$result = $this->CakeMenu->render('default');
+
+		$expected = '<ul><li>Foo Item</li><li>Bar Item</li></ul>';
+		$this->assertEquals($expected, $result);
+	}
+
+/**
+ * testRenderSubmenus method
+ *
+ * @return void
+ */
+	public function testRenderSubmenus() {
+		$this->CakeMenu->create('default', array(
+			'renderer' => 'CakeMenu.TestList'
+		));
+
+		$this->CakeMenu->add('default', 'foo_root', 'Foo Root');
+		$this->CakeMenu->add('default.foo_root', 'subitem_a', 'Item A');
+		$this->CakeMenu->add('default.foo_root', 'subitem_b', 'Item B');
+
+		$this->CakeMenu->add('default', 'bar_root', 'Bar Root');
+
+		$result = $this->CakeMenu->render('default');
+
+		$expected = '<ul><li>Foo Root<ul><li>Item A</li><li>Item B</li></ul></li><li>Bar Root</li></ul>';
+		$this->assertEquals($expected, $result);
+	}
 }

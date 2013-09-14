@@ -12,6 +12,13 @@ class CakeMenuHelper extends AppHelper {
 	protected $_menus = array();
 
 /**
+ * Holds the renderer instances
+ *
+ * @var array
+ */
+	protected $_renderers = array();
+
+/**
  * Default options for various menus
  *
  * @var array
@@ -39,12 +46,113 @@ class CakeMenuHelper extends AppHelper {
 	}
 
 /**
+ * Adds a new item to a menu
+ *
+ * @param string $menu
+ * @param string $key
+ * @param string $label
+ * @param array $options
+ * @return void
+ */
+	public function add($menu, $key, $label, $options = array()) {
+		$path = array();
+		if (strpos($menu, '.') !== false) {
+			$path = explode('.', $menu);
+			$menu = array_shift($path);
+		}
+
+		if (!array_key_exists($menu, $this->_menus)) {
+			$this->create($menu);
+		}
+
+		$item = array(
+			'label' => $label,
+			'options' => $options
+		);
+
+		if (empty($path)) {
+			$this->_menus[$menu]['items'][$key] = $item;
+		} else {
+			$path = implode($path, '.') . '.items.' . $key;
+			$this->_menus[$menu]['items'] = Hash::insert($this->_menus[$menu]['items'], $path, $item);
+		}
+	}
+
+/**
  * Returns the config for a menu
  *
  * @param string $menu
  * @return array
  */
-	public function config($menu) {
+	public function config($menu = null) {
+		if ($menu === null) {
+			return $this->_menus;
+		}
+
 		return $this->_menus[$menu];
+	}
+
+/**
+ * Returns the rendered menu
+ *
+ * @param string $menu
+ * @return string
+ */
+	public function render($menu) {
+		$config = $this->config($menu);
+		$renderer = $this->_renderer($menu);
+
+		$menuContent = '';
+		foreach ($config['items'] as $key => $item) {
+			if (!empty($item['items'])) {
+				$menuContent .= $this->_renderSubmenu($menu, $key, $item);
+			} else {
+				$menuContent .= $renderer->item($key, $item['label'], $item['options']);
+			}
+		}
+
+		return $renderer->menu($menu, $menuContent);
+	}
+
+/**
+ * Recursive method to render all the submenus
+ *
+ * @param string $menu
+ * @param string $key
+ * @param array $item
+ * @return string
+ */
+	protected function _renderSubmenu($menu, $key, $item) {
+		$renderer = $this->_renderer($menu);
+
+		$content = '';
+		foreach ($item['items'] as $key => $subItem) {
+			if (!empty($subItem['items'])) {
+				$content .= $this->_renderSubmenu($menu, $key, $subItem);
+			} else {
+				$content .= $renderer->item($key, $subItem['label'], $subItem['options']);
+			}
+		}
+
+		return $renderer->submenu($key, $item['label'], $content, $item['options']);
+	}
+
+/**
+ * Generates and returns the renderer for a menu
+ *
+ * @param string $menu
+ * @return object
+ */
+	protected function _renderer($menu) {
+		if (!array_key_exists($menu, $this->_renderers)) {
+			$plugin = 'CakeMenu';
+			$className = 'TestListMenuRenderer';
+
+			App::uses($className, $plugin . '.View/Helper/CakeMenu');
+
+			$this->_renderers[$menu] = new $className();
+		}
+
+		return $this->_renderers[$menu];
 	}
 }
