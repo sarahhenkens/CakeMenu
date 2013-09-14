@@ -58,11 +58,19 @@ class CakeMenuHelper extends AppHelper {
 		$path = array();
 		if (strpos($menu, '.') !== false) {
 			$path = explode('.', $menu);
-			$menu = array_shift($path);
+			$menu = $path[0];
+		} else {
+			$path = array($menu);
 		}
 
 		if (!array_key_exists($menu, $this->_menus)) {
 			$this->create($menu);
+		}
+
+		$subitems = array();
+		if (!empty($options['items'])) {
+			$subitems = $options['items'];
+			unset($options['items']);
 		}
 
 		$item = array(
@@ -70,11 +78,16 @@ class CakeMenuHelper extends AppHelper {
 			'options' => $options
 		);
 
-		if (empty($path)) {
-			$this->_menus[$menu]['items'][$key] = $item;
-		} else {
-			$path = implode($path, '.') . '.items.' . $key;
-			$this->_menus[$menu]['items'] = Hash::insert($this->_menus[$menu]['items'], $path, $item);
+		$hashPath = implode($path, '.items.') . '.items.' . $key;
+		$this->_menus = Hash::insert($this->_menus, $hashPath, $item);
+
+		if (!empty($subitems)) {
+			foreach ($subitems as $subitemKey => $subitem) {
+				$subitem = array_merge(array('options' => array()), $subitem);
+
+				$submenuKey = implode($path, '.') . '.' . $key;
+				$this->add($submenuKey, $subitemKey, $subitem['label'], $subitem['options']);
+			}
 		}
 	}
 

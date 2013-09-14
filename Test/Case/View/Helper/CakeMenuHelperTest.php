@@ -99,6 +99,38 @@ class CakeMenuHelperTest extends CakeTestCase {
 	}
 
 /**
+ * testAddBulkSubmenus method
+ *
+ * @return void
+ */
+	public function testAddBulkSubmenus() {
+		$this->CakeMenu->add('default', 'jelle', 'Jelle The Root', array(
+			'items' => array(
+				'sub_item_a' => array('label' => 'Sub Label A'),
+				'sub_item_b' => array('label' => 'Sub Label B', 'options' => array(
+					'items' => array(
+						'deeper' => array('label' => 'We have to go deeper'),
+						'awesome' => array('label' => 'This is awesome', 'options' => array('foo' => 'bar'))
+					)
+				))
+			)
+		));
+
+		$result = $this->CakeMenu->config('default');
+		$expected = array('jelle');
+		$this->assertEquals($expected, array_keys($result['items']));
+
+		$expected = array('sub_item_a', 'sub_item_b');
+		$this->assertEquals($expected, array_keys($result['items']['jelle']['items']));
+
+		$expected = array('deeper', 'awesome');
+		$this->assertEquals($expected, array_keys($result['items']['jelle']['items']['sub_item_b']['items']));
+
+		$expected = array('foo' => 'bar');
+		$this->assertEquals($expected, $result['items']['jelle']['items']['sub_item_b']['items']['awesome']['options']);
+	}
+
+/**
  * testRenderBasic method
  *
  * @return void
