@@ -119,9 +119,12 @@ class CakeMenuHelper extends AppHelper {
 		$menuContent = '';
 		foreach ($config['items'] as $key => $item) {
 			if (!empty($item['items'])) {
-				$menuContent .= $this->_renderSubmenu($menu, $key, $item);
+				$menuContent .= $this->_renderSubmenu($menu, $key, $item, 1);
 			} else {
-				$menuContent .= $renderer->item($key, $item['label'], $item['url'], $item['options']);
+				$params = array(
+					'level' => 0
+				);
+				$menuContent .= $renderer->item($key, $item['label'], $item['url'], $item['options'], $params);
 			}
 		}
 
@@ -136,15 +139,18 @@ class CakeMenuHelper extends AppHelper {
  * @param array $item
  * @return string
  */
-	protected function _renderSubmenu($menu, $key, $item) {
+	protected function _renderSubmenu($menu, $key, $item, $level) {
 		$renderer = $this->_renderer($menu);
 
 		$content = '';
 		foreach ($item['items'] as $key => $subItem) {
 			if (!empty($subItem['items'])) {
-				$content .= $this->_renderSubmenu($menu, $key, $subItem);
+				$content .= $this->_renderSubmenu($menu, $key, $subItem, $level + 1);
 			} else {
-				$content .= $renderer->item($key, $subItem['label'], $subItem['url'], $subItem['options']);
+				$params = array(
+					'level' => $level
+				);
+				$content .= $renderer->item($key, $subItem['label'], $subItem['url'], $subItem['options'], $params);
 			}
 		}
 
