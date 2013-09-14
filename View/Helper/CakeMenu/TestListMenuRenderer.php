@@ -2,7 +2,7 @@
 
 class TestListMenuRenderer {
 
-	public function item($key, $label, $options) {
+	public function item($key, $label, $url, $options) {
 		return '<li>' . $label . '</li>';
 	}
 
@@ -10,7 +10,7 @@ class TestListMenuRenderer {
 		return '<ul>' . $contents . '</ul>';
 	}
 
-	public function submenu($key, $label, $content, $options) {
+	public function submenu($key, $label, $url, $content, $options) {
 		return '<li>' . $label . '<ul>' . $content . '</ul></li>';
 	}
 }

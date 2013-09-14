@@ -53,8 +53,8 @@ class CakeMenuHelperTest extends CakeTestCase {
  * @return void
  */
 	public function testAddSimple() {
-		$this->CakeMenu->add('default', 'first', 'First Label');
-		$this->CakeMenu->add('default', 'second', 'Second Label');
+		$this->CakeMenu->add('default', 'first', 'First Label', array());
+		$this->CakeMenu->add('default', 'second', 'Second Label', array('controller' => 'users', 'action' => 'index'));
 
 		$result = $this->CakeMenu->config('default');
 		
@@ -63,6 +63,7 @@ class CakeMenuHelperTest extends CakeTestCase {
 
 		$expected = array(
 			'label' => 'Second Label',
+			'url' => array('controller' => 'users', 'action' => 'index'),
 			'options' => array()
 		);
 		$this->assertEquals($expected, $result['items']['second']);
@@ -74,11 +75,11 @@ class CakeMenuHelperTest extends CakeTestCase {
  * @return void
  */
 	public function testAddSubmenus() {
-		$this->CakeMenu->add('default', 'root_one', 'Root First');
-		$this->CakeMenu->add('default', 'root_two', 'Root Second');
+		$this->CakeMenu->add('default', 'root_one', 'Root First', array());
+		$this->CakeMenu->add('default', 'root_two', 'Root Second', array());
 
-		$this->CakeMenu->add('default.root_one', 'item_a', 'Item A');
-		$this->CakeMenu->add('default.root_one', 'item_b', 'Item B');
+		$this->CakeMenu->add('default.root_one', 'item_a', 'Item A', array());
+		$this->CakeMenu->add('default.root_one', 'item_b', 'Item B', array());
 
 		$result = $this->CakeMenu->config();
 		$expected = array('default');
@@ -89,9 +90,9 @@ class CakeMenuHelperTest extends CakeTestCase {
 		$expected = array('root_one', 'root_two');
 		$this->assertEquals($expected, array_keys($result['items']));
 
-		$expected = array('label', 'options', 'items');
+		$expected = array('label', 'url', 'options', 'items');
 		$this->assertEquals($expected, array_keys($result['items']['root_one']));
-		$expected = array('label', 'options');
+		$expected = array('label', 'url', 'options');
 		$this->assertEquals($expected, array_keys($result['items']['root_two']));
 
 		$expected = array('item_a', 'item_b');
@@ -104,19 +105,20 @@ class CakeMenuHelperTest extends CakeTestCase {
  * @return void
  */
 	public function testAddBulkSubmenus() {
-		$this->CakeMenu->add('default', 'jelle', 'Jelle The Root', array(
+		$this->CakeMenu->add('default', 'jelle', 'Jelle The Root', 'www.google.com', array(
 			'items' => array(
-				'sub_item_a' => array('label' => 'Sub Label A'),
-				'sub_item_b' => array('label' => 'Sub Label B', 'options' => array(
+				'sub_item_a' => array('label' => 'Sub Label A', 'url' => array()),
+				'sub_item_b' => array('label' => 'Sub Label B', 'url' => array(), 'options' => array(
 					'items' => array(
-						'deeper' => array('label' => 'We have to go deeper'),
-						'awesome' => array('label' => 'This is awesome', 'options' => array('foo' => 'bar'))
+						'deeper' => array('label' => 'We have to go deeper', 'url' => array()),
+						'awesome' => array('label' => 'This is awesome', 'url' => array(), 'options' => array('foo' => 'bar'))
 					)
 				))
 			)
 		));
 
 		$result = $this->CakeMenu->config('default');
+
 		$expected = array('jelle');
 		$this->assertEquals($expected, array_keys($result['items']));
 
@@ -140,8 +142,8 @@ class CakeMenuHelperTest extends CakeTestCase {
 			'renderer' => 'CakeMenu.TestList'
 		));
 
-		$this->CakeMenu->add('default', 'foo', 'Foo Item');
-		$this->CakeMenu->add('default', 'bar', 'Bar Item');
+		$this->CakeMenu->add('default', 'foo', 'Foo Item', array());
+		$this->CakeMenu->add('default', 'bar', 'Bar Item', array());
 
 		$result = $this->CakeMenu->render('default');
 
@@ -159,12 +161,12 @@ class CakeMenuHelperTest extends CakeTestCase {
 			'renderer' => 'CakeMenu.TestList'
 		));
 
-		$this->CakeMenu->add('default', 'foo_root', 'Foo Root');
-		$this->CakeMenu->add('default.foo_root', 'subitem_a', 'Item A');
-		$this->CakeMenu->add('default.foo_root.subitem_a', 'deep', 'Deep');
-		$this->CakeMenu->add('default.foo_root', 'subitem_b', 'Item B');
+		$this->CakeMenu->add('default', 'foo_root', 'Foo Root', array());
+		$this->CakeMenu->add('default.foo_root', 'subitem_a', 'Item A', array());
+		$this->CakeMenu->add('default.foo_root.subitem_a', 'deep', 'Deep', array());
+		$this->CakeMenu->add('default.foo_root', 'subitem_b', 'Item B', array());
 
-		$this->CakeMenu->add('default', 'bar_root', 'Bar Root');
+		$this->CakeMenu->add('default', 'bar_root', 'Bar Root', array());
 
 		$result = $this->CakeMenu->render('default');
 

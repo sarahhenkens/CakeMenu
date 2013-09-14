@@ -54,7 +54,7 @@ class CakeMenuHelper extends AppHelper {
  * @param array $options
  * @return void
  */
-	public function add($menu, $key, $label, $options = array()) {
+	public function add($menu, $key, $label, $url, $options = array()) {
 		$path = array();
 		if (strpos($menu, '.') !== false) {
 			$path = explode('.', $menu);
@@ -75,6 +75,7 @@ class CakeMenuHelper extends AppHelper {
 
 		$item = array(
 			'label' => $label,
+			'url' => $url,
 			'options' => $options
 		);
 
@@ -86,7 +87,7 @@ class CakeMenuHelper extends AppHelper {
 				$subitem = array_merge(array('options' => array()), $subitem);
 
 				$submenuKey = implode($path, '.') . '.' . $key;
-				$this->add($submenuKey, $subitemKey, $subitem['label'], $subitem['options']);
+				$this->add($submenuKey, $subitemKey, $subitem['label'], $subitem['url'], $subitem['options']);
 			}
 		}
 	}
@@ -120,7 +121,7 @@ class CakeMenuHelper extends AppHelper {
 			if (!empty($item['items'])) {
 				$menuContent .= $this->_renderSubmenu($menu, $key, $item);
 			} else {
-				$menuContent .= $renderer->item($key, $item['label'], $item['options']);
+				$menuContent .= $renderer->item($key, $item['label'], $item['url'], $item['options']);
 			}
 		}
 
@@ -143,11 +144,11 @@ class CakeMenuHelper extends AppHelper {
 			if (!empty($subItem['items'])) {
 				$content .= $this->_renderSubmenu($menu, $key, $subItem);
 			} else {
-				$content .= $renderer->item($key, $subItem['label'], $subItem['options']);
+				$content .= $renderer->item($key, $subItem['label'], $subItem['url'], $subItem['options']);
 			}
 		}
 
-		return $renderer->submenu($key, $item['label'], $content, $item['options']);
+		return $renderer->submenu($key, $item['label'], $item['url'], $content, $item['options']);
 	}
 
 /**
@@ -158,10 +159,17 @@ class CakeMenuHelper extends AppHelper {
  */
 	protected function _renderer($menu) {
 		if (!array_key_exists($menu, $this->_renderers)) {
-			$plugin = 'CakeMenu';
-			$className = 'TestListMenuRenderer';
+			$renderer = $this->_menus[$menu]['options']['renderer'];
 
-			App::uses($className, $plugin . '.View/Helper/CakeMenu');
+			$plugin = '';
+			$className = $renderer;
+
+			if (strpos($renderer, '.') !== false) {
+				list($plugin, $className) = explode('.', $renderer);
+				$plugin .= '.';
+			}
+			$className .= 'MenuRenderer';
+			App::uses($className, $plugin . 'View/Helper/CakeMenu');
 
 			$this->_renderers[$menu] = new $className();
 		}
