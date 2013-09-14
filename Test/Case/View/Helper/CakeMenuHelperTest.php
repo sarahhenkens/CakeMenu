@@ -161,13 +161,14 @@ class CakeMenuHelperTest extends CakeTestCase {
 
 		$this->CakeMenu->add('default', 'foo_root', 'Foo Root');
 		$this->CakeMenu->add('default.foo_root', 'subitem_a', 'Item A');
+		$this->CakeMenu->add('default.foo_root.subitem_a', 'deep', 'Deep');
 		$this->CakeMenu->add('default.foo_root', 'subitem_b', 'Item B');
 
 		$this->CakeMenu->add('default', 'bar_root', 'Bar Root');
 
 		$result = $this->CakeMenu->render('default');
 
-		$expected = '<ul><li>Foo Root<ul><li>Item A</li><li>Item B</li></ul></li><li>Bar Root</li></ul>';
+		$expected = '<ul><li>Foo Root<ul><li>Item A<ul><li>Deep</li></ul></li><li>Item B</li></ul></li><li>Bar Root</li></ul>';
 		$this->assertEquals($expected, $result);
 	}
 }
