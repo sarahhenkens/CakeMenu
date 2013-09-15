@@ -10,6 +10,21 @@ App::uses('CakeMenuHelper', 'CakeMenu.View/Helper');
 class CakeMenuHelperTest extends CakeTestCase {
 
 /**
+ * A big test menu config to test active mapping
+ *
+ * @var array
+ */
+	protected $_testMenuConfig = array(
+		'dashboard' => array('label' => 'Dashboard', 'url' => array('controller' => 'users', 'action' => 'dashboard')),
+		'users' => array(
+			'label' => 'Users Menu',
+			'options' => array('items' => array(
+				'overview' => array('label' => 'Overview', 'url' => array('controller' => 'users', 'action' => 'index'))
+			))
+		)
+	);
+
+/**
  * setUp method
  *
  * @return void
@@ -67,6 +82,45 @@ class CakeMenuHelperTest extends CakeTestCase {
 			'options' => array()
 		);
 		$this->assertEquals($expected, $result['items']['second']);
+	}
+
+/**
+ * testAddMultiple method
+ *
+ * @return void
+ */
+	public function testAddMultiple() {
+		$data = array(
+			'first' => array('label' => 'First Label'),
+			'second' => array('label' => 'Second Label')
+		);
+		$this->CakeMenu->add('foobar', $data);
+		$result = $this->CakeMenu->config('foobar');
+		$expected = array('first', 'second');
+		$this->assertEquals($expected, array_keys($result['items']));
+
+		$data = array(
+			array('key' => 'first', 'label' => 'First Label', 'options' => array(
+				'items' => array(
+					array('key' => 'foo', 'label' => 'Foo Label'),
+					array('key' => 'bar', 'label' => 'Foo Bar')
+				)
+			)),
+			array('key' => 'companies', 'label' => 'Companies', 'options' => array(
+				'items' => array(
+					'google' => array('label' => 'Google Inc.', 'url' => 'www.google.com')
+				)
+			))
+		);
+		$this->CakeMenu->add('another', $data);
+		$result = $this->CakeMenu->config('another');
+		$expected = array('first', 'companies');
+		$this->assertEquals($expected, array_keys($result['items']));
+		$this->assertArrayHasKey('google', $result['items']['companies']['items']);
+		$this->assertEquals('www.google.com', $result['items']['companies']['items']['google']['url']);
+
+		$expected = array('foo', 'bar');
+		$this->assertEquals($expected, array_keys($result['items']['first']['items']));
 	}
 
 /**
@@ -174,5 +228,26 @@ class CakeMenuHelperTest extends CakeTestCase {
 
 		$expected = '<ul><li>Foo Root<ul><li>Item A<ul><li>Deep</li></ul></li><li>Item B</li></ul></li><li>Bar Root</li></ul>';
 		$this->assertEquals($expected, $result);
+	}
+
+/**
+ * testDetectActive method
+ *
+ * @return void
+ */
+	public function testDetectActive() {
+		$this->CakeMenu->add('default', $this->_testMenuConfig);
+
+		$this->CakeMenu->request->params['controller'] = 'users';
+		$this->CakeMenu->request->params['action'] = 'index';
+		$this->assertEquals('users.overview', $this->CakeMenu->detectActive('default'));
+
+		$this->CakeMenu->request->params['controller'] = 'users';
+		$this->CakeMenu->request->params['action'] = 'dashboard';
+		$this->assertEquals('dashboard', $this->CakeMenu->detectActive('default'));
+
+		$this->CakeMenu->request->params['controller'] = 'unknowncontroller';
+		$this->CakeMenu->request->params['action'] = 'foobar';
+		$this->assertFalse($this->CakeMenu->detectActive('default'));
 	}
 }

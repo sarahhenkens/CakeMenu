@@ -12,6 +12,13 @@ class CakeMenuHelper extends AppHelper {
 	protected $_menus = array();
 
 /**
+ * Holds the parsed items map
+ *
+ * @var array
+ */
+	protected $_itemsMap = array();
+
+/**
  * Holds the renderer instances
  *
  * @var array
@@ -54,7 +61,20 @@ class CakeMenuHelper extends AppHelper {
  * @param array $options
  * @return void
  */
-	public function add($menu, $key, $label, $url = null, $options = array()) {
+	public function add($menu, $key, $label = null, $url = null, $options = array()) {
+		if (is_array($key)) {
+			foreach ($key as $k => $item) {
+				if (is_string($k)) {
+					$item['key'] = $k;
+				}
+
+				$item = array_merge(array('url' => null, 'options' => array()), $item);
+				$this->add($menu, $item['key'], $item['label'], $item['url'], $item['options']);
+			}
+
+			return;
+		}
+
 		$path = array();
 		if (strpos($menu, '.') !== false) {
 			$path = explode('.', $menu);
@@ -83,12 +103,8 @@ class CakeMenuHelper extends AppHelper {
 		$this->_menus = Hash::insert($this->_menus, $hashPath, $item);
 
 		if (!empty($subitems)) {
-			foreach ($subitems as $subitemKey => $subitem) {
-				$subitem = array_merge(array('url' => null, 'options' => array()), $subitem);
-
-				$submenuKey = implode($path, '.') . '.' . $key;
-				$this->add($submenuKey, $subitemKey, $subitem['label'], $subitem['url'], $subitem['options']);
-			}
+			$submenuKey = implode($path, '.') . '.' . $key;
+			$this->add($submenuKey, $subitems);
 		}
 	}
 
@@ -181,5 +197,68 @@ class CakeMenuHelper extends AppHelper {
 		}
 
 		return $this->_renderers[$menu];
+	}
+
+/**
+ * Flattens all the leafs in the menu to match the active path
+ *
+ * @param string $menu
+ * @param array $items
+ * @param string $path
+ * @return void
+ */
+	protected function _generateItemsMap($menu, $items = null, $path = '') {
+		if ($items === null) {
+			$items = $this->_menus[$menu]['items'];
+		}
+
+		foreach ($items as $key => $item) {
+			if (empty($item['items'])) {
+				$this->_itemsMap[$menu][$path . $key] = $item;
+			} else {
+				$this->_generateItemsMap($menu, $item['items'], $path . $key . '.');
+			}
+		}
+	}
+
+/**
+ * Returns the flattened items map
+ *
+ * @param string $menu
+ * @return array
+ */
+	public function itemsMap($menu) {
+		if (empty($this->_itemsMap[$menu])) {
+			$this->_generateItemsMap($menu);
+		}
+
+		return $this->_itemsMap[$menu];
+	}
+
+/**
+ * Will detect the active menu leaf based on the CakeRequest
+ *
+ * @param string $menu
+ * @return string|boolean Will return false if nothing can be detected
+ */
+	public function detectActive($menu) {
+		$map = $this->itemsMap($menu);
+
+		$activePath = false;
+
+		foreach ($map as $path => $item) {
+			if (!is_array($item['url'])) {
+				continue;
+			}
+
+			$match = array_intersect_key($item['url'], array_flip(array('plugin', 'controller', 'action')));
+			$test = array_diff_assoc($match, $this->request->params);
+			if (empty($test)) {
+				$activePath = $path;
+				break;
+			}
+		}
+
+		return $activePath;
 	}
 }
