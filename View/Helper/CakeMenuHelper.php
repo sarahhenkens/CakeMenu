@@ -305,4 +305,15 @@ class CakeMenuHelper extends AppHelper {
 
 		return strpos($active, implode('.', $path)) === 0;
 	}
+
+/**
+ * Overwrite the matcher and always active the given path
+ *
+ * @param string $menu
+ * @param string $path
+ * @return void
+ */
+	public function setActive($menu, $path) {
+		$this->_active[$menu] = $path;
+	}
 }
