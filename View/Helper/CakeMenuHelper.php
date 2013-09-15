@@ -177,7 +177,7 @@ class CakeMenuHelper extends AppHelper {
 			$className .= 'MenuRenderer';
 			App::uses($className, $plugin . 'View/Helper/CakeMenu');
 
-			$this->_renderers[$menu] = new $className();
+			$this->_renderers[$menu] = new $className($this->_View);
 		}
 
 		return $this->_renderers[$menu];

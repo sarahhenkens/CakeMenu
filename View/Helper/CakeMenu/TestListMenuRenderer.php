@@ -1,6 +1,8 @@
 <?php
 
-class TestListMenuRenderer {
+App::uses('BaseMenuRenderer', 'CakeMenu.View/Helper/CakeMenu');
+
+class TestListMenuRenderer extends BaseMenuRenderer {
 
 	public function item($key, $label, $url, $options) {
 		return '<li>' . $label . '</li>';
