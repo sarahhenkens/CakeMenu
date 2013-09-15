@@ -48,13 +48,13 @@ class CakeMenuHelper extends AppHelper {
 /**
  * Adds a new item to a menu
  *
- * @param string $menu
+ * @param string $menu The menu alias
  * @param string $key
  * @param string $label
  * @param array $options
  * @return void
  */
-	public function add($menu, $key, $label, $url, $options = array()) {
+	public function add($menu, $key, $label, $url = null, $options = array()) {
 		$path = array();
 		if (strpos($menu, '.') !== false) {
 			$path = explode('.', $menu);
@@ -84,7 +84,7 @@ class CakeMenuHelper extends AppHelper {
 
 		if (!empty($subitems)) {
 			foreach ($subitems as $subitemKey => $subitem) {
-				$subitem = array_merge(array('options' => array()), $subitem);
+				$subitem = array_merge(array('url' => null, 'options' => array()), $subitem);
 
 				$submenuKey = implode($path, '.') . '.' . $key;
 				$this->add($submenuKey, $subitemKey, $subitem['label'], $subitem['url'], $subitem['options']);

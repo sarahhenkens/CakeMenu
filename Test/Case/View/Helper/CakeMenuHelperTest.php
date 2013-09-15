@@ -107,7 +107,7 @@ class CakeMenuHelperTest extends CakeTestCase {
 	public function testAddBulkSubmenus() {
 		$this->CakeMenu->add('default', 'jelle', 'Jelle The Root', 'www.google.com', array(
 			'items' => array(
-				'sub_item_a' => array('label' => 'Sub Label A', 'url' => array()),
+				'sub_item_a' => array('label' => 'Sub Label A'),
 				'sub_item_b' => array('label' => 'Sub Label B', 'url' => array(), 'options' => array(
 					'items' => array(
 						'deeper' => array('label' => 'We have to go deeper', 'url' => array()),
@@ -130,6 +130,8 @@ class CakeMenuHelperTest extends CakeTestCase {
 
 		$expected = array('foo' => 'bar');
 		$this->assertEquals($expected, $result['items']['jelle']['items']['sub_item_b']['items']['awesome']['options']);
+
+		$this->assertNull($result['items']['jelle']['items']['sub_item_a']['url']);
 	}
 
 /**
