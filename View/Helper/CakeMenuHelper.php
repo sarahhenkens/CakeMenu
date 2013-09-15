@@ -157,7 +157,7 @@ class CakeMenuHelper extends AppHelper {
 			}
 		}
 
-		return $renderer->menu($menu, $menuContent);
+		return $renderer->menu($menu, $menuContent, $config['options']);
 	}
 
 /**
