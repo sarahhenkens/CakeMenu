@@ -56,7 +56,7 @@ class CakeMenuHelperTest extends CakeTestCase {
 
 		$result = $this->CakeMenu->config('foobar');
 		$expected = array(
-			'options' => array('renderer' => 'CakeMenu.ListMenuRenderer'),
+			'options' => array('renderer' => 'CakeMenu.Simple'),
 			'items' => array()
 		);
 		$this->assertEquals($expected, $result);
@@ -249,5 +249,36 @@ class CakeMenuHelperTest extends CakeTestCase {
 		$this->CakeMenu->request->params['controller'] = 'unknowncontroller';
 		$this->CakeMenu->request->params['action'] = 'foobar';
 		$this->assertFalse($this->CakeMenu->detectActive('default'));
+	}
+
+/**
+ * testDetectActiveWithMatchOptions method
+ *
+ * @return void
+ */
+	public function testDetectActiveWithMatchOptions() {
+		$this->CakeMenu->add('default', 'first', 'First', array('controller' => 'users', 'action' => 'index'), array(
+			'match' => array(
+				array('controller' => 'users', 'action' => 'foo'),
+				array('controller' => 'users', 'action' => 'bar')
+			)
+		));
+		$this->CakeMenu->add('default', 'second', 'Second', array('controller' => 'shows', 'action' => 'index'), array(
+			'match' => array(
+				array('controller' => 'shows', 'action' => 'foobar')
+			)
+		));
+
+		$this->CakeMenu->request->params['controller'] = 'users';
+		$this->CakeMenu->request->params['action'] = 'foo';
+		$this->assertEquals('first', $this->CakeMenu->detectActive('default'));
+
+		$this->CakeMenu->request->params['controller'] = 'users';
+		$this->CakeMenu->request->params['action'] = 'index';
+		$this->assertEquals('first', $this->CakeMenu->detectActive('default'));
+
+		$this->CakeMenu->request->params['controller'] = 'shows';
+		$this->CakeMenu->request->params['action'] = 'foobar';
+		$this->assertEquals('second', $this->CakeMenu->detectActive('default'));
 	}
 }
