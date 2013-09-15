@@ -274,11 +274,18 @@ class CakeMenuHelper extends AppHelper {
 				continue;
 			}
 
-			$match = array_intersect_key($item['url'], array_flip(array('plugin', 'controller', 'action')));
-			$test = array_diff_assoc($match, $this->request->params);
-			if (empty($test)) {
-				$activePath = $path;
-				break;
+			$urls = array($item['url']);
+			if (!empty($item['options']['match'])) {
+				$urls = array_merge($urls, $item['options']['match']);
+			}
+
+			foreach ($urls as $url) {
+				$match = array_intersect_key($url, array_flip(array('plugin', 'controller', 'action')));
+				$test = array_diff_assoc($url, $this->request->params);
+				if (empty($test)) {
+					$activePath = $path;
+					break 2;
+				}
 			}
 		}
 
