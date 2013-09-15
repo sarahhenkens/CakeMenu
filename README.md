@@ -31,6 +31,16 @@ In your plugin directory type
 
 In `app/Config/bootstrap.php` add: `CakePlugin::load('CakeMenu')`;
 
-## Configuration:
+## Show me how to print a basic menu
 
-TODO: Write this section
+```php
+$this->CakeMenu->create('nav');
+
+$this->CakeMenu->add('nav', 'home', 'Homepage', array('controller' => 'pages', 'action' => 'home'));
+$this->CakeMenu->add('nav', 'blog', 'Blog', array('controller' => 'blog_posts', 'action' => 'index'));
+$this->CakeMenu->add('nav', 'support', 'Support', 'http://help.me');
+
+echo $this->CakeMenu->render('nav');
+```
+
+TODO: Show output example for the still to create BasicMenuRenderer
