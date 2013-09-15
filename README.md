@@ -34,14 +34,22 @@ In `app/Config/bootstrap.php` add: `CakePlugin::load('CakeMenu')`;
 ## Show me how to print a basic menu
 
 ```php
+//Initialize the menu 'nav'
 $this->CakeMenu->create('nav');
 
+//Some root level menu items
 $this->CakeMenu->add('nav', 'home', 'Homepage', array('controller' => 'pages', 'action' => 'home'));
 $this->CakeMenu->add('nav', 'blog', 'Blog', array('controller' => 'blog_posts', 'action' => 'index'));
-$this->CakeMenu->add('nav', 'support', 'Support', 'http://help.me');
 
+//A submenu
+$this->CakeMenu->add('nav', 'support', 'Support', '#');
+$this->CakeMenu->add('nav.support', 'faq', '/faq');
+$this->CakeMenu->add('nav.support', 'forum', '/forum');
+
+//Set the active menu to blog
 $this->CakeMenu->setActive('nav', 'blog');
 
+//Output the menu
 echo $this->CakeMenu->render('nav');
 ```
 
@@ -55,7 +63,15 @@ Output:
         <a href="/blog_posts">Blog</a>
     </li>
     <li>
-        <a href="http://help.me">Support</a>
+        <a href="#">Support</a>
+        <ul class="submenu">
+            <li>
+                <a href="/faq">/faq</a>
+            </li>
+            <li>
+                <a href="/forum">/forum</a>
+            </li>
+        </ul>
     </li>
 </ul>
 ```
