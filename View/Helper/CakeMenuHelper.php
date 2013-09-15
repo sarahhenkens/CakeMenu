@@ -26,6 +26,13 @@ class CakeMenuHelper extends AppHelper {
 	protected $_renderers = array();
 
 /**
+ * Holds the active path for each menu
+ *
+ * @var array
+ */
+	protected $_active = array();
+
+/**
  * Default options for various menus
  *
  * @var array
@@ -131,14 +138,20 @@ class CakeMenuHelper extends AppHelper {
 	public function render($menu) {
 		$config = $this->config($menu);
 		$renderer = $this->_renderer($menu);
+		$path = array();
 
 		$menuContent = '';
 		foreach ($config['items'] as $key => $item) {
+			$itemPath = $path;
+			$itemPath[] = $key;
+
 			if (!empty($item['items'])) {
-				$menuContent .= $this->_renderSubmenu($menu, $key, $item, 1);
+				$menuContent .= $this->_renderSubmenu($menu, $key, $item, 1, $itemPath);
 			} else {
 				$params = array(
-					'level' => 0
+					'level' => 0,
+					'path' => $itemPath,
+					'active' => $this->_isActive($menu, $itemPath)
 				);
 				$menuContent .= $renderer->item($key, $item['label'], $item['url'], $item['options'], $params);
 			}
@@ -155,22 +168,32 @@ class CakeMenuHelper extends AppHelper {
  * @param array $item
  * @return string
  */
-	protected function _renderSubmenu($menu, $key, $item, $level) {
+	protected function _renderSubmenu($menu, $key, $item, $level, $path) {
 		$renderer = $this->_renderer($menu);
 
 		$content = '';
 		foreach ($item['items'] as $key => $subItem) {
+			$itemPath = $path;
+			$itemPath[] = $key;
+
 			if (!empty($subItem['items'])) {
-				$content .= $this->_renderSubmenu($menu, $key, $subItem, $level + 1);
+				$content .= $this->_renderSubmenu($menu, $key, $subItem, $level + 1, $itemPath);
 			} else {
 				$params = array(
-					'level' => $level
+					'level' => $level,
+					'path' => $itemPath,
+					'active' => $this->_isActive($menu, $itemPath)
 				);
 				$content .= $renderer->item($key, $subItem['label'], $subItem['url'], $subItem['options'], $params);
 			}
 		}
 
-		return $renderer->submenu($key, $item['label'], $item['url'], $content, $item['options']);
+		$params = array(
+			'path' => $path,
+			'active' => $this->_isActive($menu, $path)
+		);
+
+		return $renderer->submenu($key, $item['label'], $item['url'], $content, $item['options'], $params);
 	}
 
 /**
@@ -260,5 +283,26 @@ class CakeMenuHelper extends AppHelper {
 		}
 
 		return $activePath;
+	}
+
+/**
+ * Checks if the path is active
+ *
+ * @param string $menu
+ * @param array $path
+ * @return boolean
+ */
+	protected function _isActive($menu, $path) {
+		if (!array_key_exists($menu, $this->_active)) {
+			$this->_active[$menu] = $this->detectActive($menu);
+		}
+
+		$active = $this->_active[$menu];
+
+		if (!$active) {
+			return false;
+		}
+
+		return strpos($active, implode('.', $path)) === 0;
 	}
 }
