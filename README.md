@@ -40,7 +40,22 @@ $this->CakeMenu->add('nav', 'home', 'Homepage', array('controller' => 'pages', '
 $this->CakeMenu->add('nav', 'blog', 'Blog', array('controller' => 'blog_posts', 'action' => 'index'));
 $this->CakeMenu->add('nav', 'support', 'Support', 'http://help.me');
 
+$this->CakeMenu->setActive('nav', 'blog');
+
 echo $this->CakeMenu->render('nav');
 ```
 
-TODO: Show output example for the still to create BasicMenuRenderer
+Output:
+```html
+<ul class="menu">
+    <li>
+        <a href="/pages/home">Homepage</a>
+    </li>
+    <li class="active">
+        <a href="/blog_posts">Blog</a>
+    </li>
+    <li>
+        <a href="http://help.me">Support</a>
+    </li>
+</ul>
+```

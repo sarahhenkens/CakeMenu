@@ -39,7 +39,7 @@ class CakeMenuHelper extends AppHelper {
  */
 	protected $_defaults = array(
 		'menu' => array(
-			'renderer' => 'CakeMenu.ListMenuRenderer'
+			'renderer' => 'CakeMenu.Simple'
 		)
 	);
 
